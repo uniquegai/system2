@@ -12,7 +12,7 @@ import requests  # for Groq API interaction
 # Load data
 @st.cache_data
 def load_data():
-    return pd.read_csv("m1_data.csv")
+    return pd.read_csv("fitness_users_dataset_final.csv")
 
 df = load_data()
 
@@ -112,7 +112,7 @@ def main():
             Please generate Python code that can process this request and provide the answer.
             Do not include any markdown or code block formatting ( ```python or ```). Just give the Python code directly.
 
-            My dataset file name is: m1_data.csv
+            My dataset file name is: fitness_users_dataset_final.csv
             When generating Python code, ensure the result is displayed first using Streamlit functions (st.write(), st.dataframe(), etc.).
             Once the result is displayed, store it in the variable output_data in the last line of the code. Ensure that the result is properly displayed before being assigned to the output_data variable.
             If the result is not a graph or fig, ensure that output_data stores the result including both the description and the calculated result.
@@ -159,9 +159,9 @@ def main():
 
                         # Generate explanation prompt without displaying the data in Streamlit
                         explanation_prompt = f"""
-                        You are a data analyst working on business insights for M1 based in Singapore in a meaningful manner.
-                        M1 partners with a set of merchants to offer cashback promotions to its customers. These offers are designed to increase engagement and encourage more transactions and to satisfied the customer with the M1 business.
-
+                        You are a data analyst working on fitness insights for Fitness coaches to provide insights in a meaningful manner for their customers.
+                        System2 supports Fitness coaches to connect with their clients and provide necessary fintess recommendations faster and accurate 
+                        
                         Analyze the following output:
                         {output_data}
                         Provide insights focusing on:
