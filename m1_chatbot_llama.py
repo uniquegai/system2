@@ -77,11 +77,7 @@ def main():
 
             If a column uses the to_period() function (e.g., for months or quarters), ensure that NaT values are removed first before applying .to_period().
 
-            Ensure that numerical values are properly formatted before concatenation to avoid type errors. When storing the result in output_data, use formatted string literals to format numerical values properly.
-            Example:
-            output_data = f"Average Weight: {avg_weight:.2f}, Average Height: {avg_height:.2f}"
-
-            Ensure that the numerical columns such as 'weight', 'height', and 'weight goal' are properly converted before processing:
+           Ensure that the numerical columns such as 'weight', 'height', and 'weight goal' are properly converted before processing:
 
             First, check if they are strings before applying .str.replace().
 
