@@ -85,7 +85,7 @@ def main():
 
             After removing commas using .str.replace(',', ''), convert them to numeric using pd.to_numeric(..., errors='coerce').
 
-            The 'birth date' column should be converted to datetime using errors='coerce', and the age should be computed using today's date.
+            The 'birth date' column should is in the format of "YYYY-MM-DD", and the age should be computed using today's date.
 
             The relevant columns for specific terms are as follows:
             "age", "birthdate" refer to "birth date"
@@ -94,8 +94,6 @@ def main():
             "health issue", "physical condition", or "fitness problem" refers to "physical problems"
 
             If any column used for aggregation (such as idxmax(), max(), or other similar operations) is empty or contains NaT, ensure that the code properly handles these cases by checking if the sequence is empty before applying such operations. If empty, use a fallback value like None, 0, or another default value to prevent errors.
-
-            Parse the 'birth date' column correctly with pd.to_datetime() and use errors='coerce' to handle any invalid formats.
 
             The user has requested the following:
             Show the customer name, age, gender, physical problem, meal plan, and fitness goal. Present it in a table format with brief user description.
