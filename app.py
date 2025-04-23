@@ -3,7 +3,7 @@ import importlib
 
 # Mapping of dropdown options to file names
 model_mapping = {
-    "Customer Search - LLAMA": "chatbot_llama"
+    "Customer Search - LLAMA": "m1_chatbot_llama"
 }
 
 # Set default model on first run
