@@ -47,8 +47,8 @@ def query_groq_llama(prompt):
 
 def main():
     # Streamlit app starts here
-    st.title("M1 Dynamic Data Bot")
-    st.write("Interact with your M1 data dynamically!")
+    st.title("Customer Search Bot")
+    st.write("Look for customer details")
 
     # Initialize session state to store conversation
     if "conversation" not in st.session_state:
@@ -59,7 +59,7 @@ def main():
     st.dataframe(df.head(3))  # Display the first 5 rows
 
     # User Input
-    query = st.text_input("What insights are you seeking? (e.g., What’s the total value of orders in 2024?)")
+    query = st.text_input("Ask the info you want to know about your customer?")
 
     if st.button("Submit"):
         if query:
@@ -71,66 +71,52 @@ def main():
             # Use Groq LLaMA to generate Python code based on the user query
             groq_prompt = f"""
             You are a helpful assistant that generates Python code for data analysis. The dataset contains the following columns:
-            {', '.join(df.columns)}
+            userid, address, assigned coach, assigned meal plan, birth date, physical problems, default meal plan, email, first name, last name, planid, product, phone number, coach notes about physical problems, daily activity level, days available to workout, current workout days, weight, user device, allergen tags, meal goals, gender, current weight, height, weight goal, dietary restrictions
 
             Remove records with empty rows.
-            If a column uses the `to_period()` function (e.g., for months or quarters), ensure that `NaT` values are removed first before applying `.to_period()`.
-            Ensure that numerical values are properly formatted before concatenation to avoid type errors. When storing the result in `output_data`, use formatted string literals to format numerical values properly. 
-            example:output_data = f"Average Order Value: (avg_order_value:.2f), Average Cashback: (avg_cashback:.2f)".This ensures that numerical values are converted to strings with two decimal places before being concatenated.
-            Ensure that the numerical columns, such as 'Estimate Optimise Cashback Value' and 'Estimate Order Value', are properly converted before processing.  
-                1. First, check if they are strings before applying `.str.replace()`.  
-                2. If they are not strings, convert them using `.astype(str)`.  
-                3. After removing commas using `.str.replace(',', '')`, convert them to numeric using `pd.to_numeric(..., errors='coerce')`.  
 
-            Please ensure that the 'Advertiser' and 'Status' columns are cleaned by replacing specific values as follows if user query asks about advertiser or status, if needed:
+            If a column uses the to_period() function (e.g., for months or quarters), ensure that NaT values are removed first before applying .to_period().
 
-            1. **For the 'Advertiser' column**:
-                - 'Samsung Singapore' -> 'Samsung SG'
-                - 'Lazada (SG)' -> 'Lazada SG'
-                - 'Fairprice ON' -> 'FairPrice Online'
-                - 'Shopee Singapore' -> 'Shopee Singapore'
-                - 'Shopee SG - CPS' -> 'Shopee Singapore'
-                - 'tripcom' -> 'Trip.com'
-                - 'Decathlon' -> 'Decathlon SG'
-                - 'Nike (APAC)' -> 'Nike APAC'
-                - 'Klook' -> 'Klook Travel (CPS)'
-                - 'Watsons Singapore' -> 'Watsons SG'
-                - 'Charles & Keith (SG) CPS' -> 'Charles & Keith'
-                - 'Klook Travel - CPS' -> 'Klook'
-                - 'Klook Travel (CPS)' -> 'Klook'
-                - 'Puma Singapore' -> 'Puma'
+            Ensure that numerical values are properly formatted before concatenation to avoid type errors. When storing the result in output_data, use formatted string literals to format numerical values properly.
+            Example:
+            output_data = f"Average Weight: {avg_weight:.2f}, Average Height: {avg_height:.2f}"
 
-            2. **For the 'Status' column**:
-                - 'APR' -> 'Approved'
-                - 'pending' -> 'Pending'
-                - 'rejected' -> 'Rejected'
+            Ensure that the numerical columns such as 'weight', 'height', and 'weight goal' are properly converted before processing:
 
-            Replace the values in the 'Advertiser' and 'Status' column as per the above mappings if needed.
+            First, check if they are strings before applying .str.replace().
+
+            If they are not strings, convert them using .astype(str).
+
+            After removing commas using .str.replace(',', ''), convert them to numeric using pd.to_numeric(..., errors='coerce').
+
+            The 'birth date' column should be converted to datetime using errors='coerce', and the age should be computed using today's date.
 
             The relevant columns for specific terms are as follows:
-            - "cashback", "total cashback", or similar terms refer to "Estimate Optimise Cashback Value".
-            - "order amount", "total order amount", or similar terms refer to "Estimate Order Value".
-            
-            Status column represent the status of the cashback.
+            "age", "birthdate" refer to "birth date"
+            "goal", "fitness goal", or "what they want to achieve" refers to "meal goals"
+            "meal plan" refers to "assigned meal plan"
+            "health issue", "physical condition", or "fitness problem" refers to "physical problems"
 
-            The 'Conversion Time' column uses the format `dd/mm/yyyy hh:mm`. 
-            If any sequence or column used for aggregation (such as `idxmax()`, `max()`, or other similar operations) is empty or contains NaT, please ensure that the code properly handles these cases by checking if the sequence is empty before applying operations like `idxmax()`, `max()`, or any other operation that assumes non-empty data. If the sequence is empty, use a fallback value like `None`, `0`, or any suitable default value to prevent errors.
-            Please ensure that the 'Conversion Time' column is parsed with the correct format (`%d/%m/%Y %H:%M`), and handle any errors during the parsing process by using the `errors='coerce'` option so that any invalid date values are converted to `NaT`.
-            If a column uses the to_period() function (e.g., for months), ensure that the result is converted to a string using .dt.strftime('%Y-%m') for month-based periods, or .astype(str) for other cases. This prevents serialization errors when plotting with Plotly or processing JSON data.
+            If any column used for aggregation (such as idxmax(), max(), or other similar operations) is empty or contains NaT, ensure that the code properly handles these cases by checking if the sequence is empty before applying such operations. If empty, use a fallback value like None, 0, or another default value to prevent errors.
+
+            Parse the 'birth date' column correctly with pd.to_datetime() and use errors='coerce' to handle any invalid formats.
+
             The user has requested the following:
-            {query}
+            Show the customer name, age, gender, physical problem, meal plan, and fitness goal. Present it in a table format with brief user description.
 
             Generate Python code that can process this request and provide the answer.
-            The Python code should use the pandas library to process the dataset. If the query involves generating a graph or plot, use Plotly for visualization,
-            and ensure to display the plot using st.plotly_chart(fig) for integration with a Streamlit app instead of using fig.show().
+            The Python code should use the pandas library to process the dataset.
+            If the query involves generating a graph or plot, use Plotly for visualization, and ensure to display the plot using st.plotly_chart(fig) for Streamlit compatibility.
+
             Return only the Python code, no explanations or extra text.
-            Please generate Python code that can process this request and provide the answer. Do **not include** any markdown or code block formatting (` ```python` or ` ``` `). Just give the Python code directly.
-            my dataset file name is: m1_data.csv
-            when generating Python code, ensure the result is displayed first using Streamlit functions (`st.write()`, `st.dataframe()`, etc.). Once the result is displayed, store it in the variable 'output_data' in the last line of the code. Ensure that the result is properly displayed **before** being assigned to the 'output_data' variable.
-            If the result is not a graph or fig, ensure that `output_data` stores the result incluing both the description and the calculated result.
-            Only if the result is a graph or plot, do not include any descriptive text in `output_data`.
-            
-            """
+            Please generate Python code that can process this request and provide the answer.
+            Do not include any markdown or code block formatting ( ```python or ```). Just give the Python code directly.
+
+            My dataset file name is: m1_data.csv
+            When generating Python code, ensure the result is displayed first using Streamlit functions (st.write(), st.dataframe(), etc.).
+            Once the result is displayed, store it in the variable output_data in the last line of the code. Ensure that the result is properly displayed before being assigned to the output_data variable.
+            If the result is not a graph or fig, ensure that output_data stores the result including both the description and the calculated result.
+            Only if the result is a graph or plot, do not include any descriptive text in output_data."""
 
             python_code = query_groq_llama(groq_prompt)
 
@@ -149,17 +135,22 @@ def main():
                     if isinstance(exec_globals.get('fig'), go.Figure):
                         # Generate explanation prompt for the graph
                         explanation_prompt = f"""
-                        You are a data analyst working on business insights for M1 based in Singapore in a meaningful manner.
-                        M1 partners with a set of merchants to offer cashback promotions to its customers. These offers are designed to increase engagement and encourage more transactions and to satisfied the customer with the M1 business.
+                        You are a data analyst working on personalized fitness insights for a US-based health and wellness platform. This platform partners with professional coaches and nutrition experts to provide meal plans and fitness programs that help customers achieve their health goals.
 
-                    
                         Analyze the following graph:
                         {exec_globals.get('fig')}
-                        Provide insights focusing on:
-                        - Any significant trends, low/high points, and potential implications.
-                        - Key observations and their impact on business decision-making.
 
-                        **Do not provide any Python code after explanation**
+                        Provide insights focusing on:
+                        Patterns and trends based on gender, age, fitness goals, or physical problems.
+                        Any significant peaks or drops in activity, health issues, or goal preferences.
+                        Key observations that could impact product design, coaching strategy, or personalized recommendations.
+                        Consider how health conditions (e.g., knee pain, spine issues) might influence meal plans or activity levels.
+                        Additionally, provide a short description about what the typical customer looks like based on the data:
+                        Age and gender distribution
+                        Most common health issues
+                        Most popular fitness goals and meal plans
+                        Any correlations between physical issues and their goals or meal strategies
+                        Do not provide any Python code after explanation.
                         """
 
                     else:
